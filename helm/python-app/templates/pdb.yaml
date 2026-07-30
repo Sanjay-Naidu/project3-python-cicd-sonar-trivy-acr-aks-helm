@@ -1,0 +1,20 @@
+# =============================================================================
+# Project : Project 3 - Python App CI/CD on Azure AKS
+# Author  : Sanjay Naidu
+# File    : helm/python-app/templates/pdb.yaml - PodDisruptionBudget
+# =============================================================================
+# Guarantees availability during VOLUNTARY disruptions (node drains, cluster
+# upgrades): Kubernetes will not evict below minAvailable.
+{{- if .Values.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "python-app.fullname" . }}
+  labels:
+    {{- include "python-app.labels" . | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.pdb.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "python-app.selectorLabels" . | nindent 6 }}
+{{- end }}

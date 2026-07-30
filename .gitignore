@@ -1,0 +1,44 @@
+# =============================================================================
+# Project : Project 3 - Python App CI/CD on Azure AKS
+# Author  : Sanjay Naidu
+# File    : .gitignore
+# =============================================================================
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.ruff_cache/
+
+# --- Terraform ---
+# State must NEVER be committed - it can contain secrets. Remote state lives
+# in the Azure Storage backend (see terraform/backend.tf).
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+crash.log
+*.tfplan
+
+# --- Kubernetes / Helm ---
+kubeconfig
+*.kubeconfig
+charts/*.tgz
+
+# --- IDE / OS ---
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+.DS_Store
+
+# --- Local secrets (never commit) ---
+.env
+*.pem
+*.key

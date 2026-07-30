@@ -1,0 +1,30 @@
+# =============================================================================
+# Project : Project 3 - Python App CI/CD on Azure AKS
+# Author  : Sanjay Naidu
+# File    : .github/dependabot.yml - automated dependency updates
+# =============================================================================
+# Closes the loop with the pinned versions used everywhere in this repo:
+# pins give reproducibility, Dependabot PRs keep them current, and every
+# bump PR runs the full test + Sonar + Trivy pipeline before merge.
+
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /app
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: terraform
+    directory: /terraform
+    schedule:
+      interval: weekly

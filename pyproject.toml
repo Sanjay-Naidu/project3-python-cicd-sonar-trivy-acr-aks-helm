@@ -1,0 +1,33 @@
+# =============================================================================
+# Project : Project 3 - Python App CI/CD on Azure AKS
+# Author  : Sanjay Naidu
+# File    : pyproject.toml - lint, test and coverage configuration
+# =============================================================================
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+# E/W = pycodestyle, F = pyflakes, I = import sorting, B = bugbear,
+# UP = modernize syntax, S = security (bandit-style) checks.
+select = ["E", "F", "W", "I", "B", "UP", "S"]
+# S311: random module flagged for crypto use - here it only picks a demo quote,
+# so this is a documented, justified exception rather than a blind disable.
+ignore = ["S311"]
+
+[tool.ruff.lint.per-file-ignores]
+# S101: pytest relies on bare asserts by design.
+"tests/*" = ["S101"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --strict-markers"
+
+[tool.coverage.run]
+source = ["app"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+precision = 1

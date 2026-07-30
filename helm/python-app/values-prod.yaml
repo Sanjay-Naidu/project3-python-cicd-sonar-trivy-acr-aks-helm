@@ -1,0 +1,30 @@
+# =============================================================================
+# Project : Project 3 - Python App CI/CD on Azure AKS
+# Author  : Sanjay Naidu
+# File    : helm/python-app/values-prod.yaml - prod namespace overrides
+# =============================================================================
+# Prod priorities: availability. >=2 replicas with zero-downtime rolling
+# updates, HPA for load spikes, PDB so node drains never take the app to zero,
+# and public exposure through the managed nginx ingress.
+
+replicaCount: 2
+
+ingress:
+  enabled: true
+  # Empty host: reachable on the ingress controller's public IP directly.
+  # Later, point a real domain (or use <IP>.nip.io) and add TLS here.
+  host: ""
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 70
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+appConfig:
+  ENVIRONMENT: "prod"
+  LOG_LEVEL: "INFO"

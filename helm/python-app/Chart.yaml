@@ -1,0 +1,19 @@
+# =============================================================================
+# Project : Project 3 - Python App CI/CD on Azure AKS
+# Author  : Sanjay Naidu
+# File    : helm/python-app/Chart.yaml
+# =============================================================================
+apiVersion: v2
+name: python-app
+description: >-
+  Production-shaped Helm chart for the DevOps Quotes API (FastAPI).
+  One chart, per-environment values files (values-dev.yaml / values-prod.yaml).
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - fastapi
+  - aks
+  - cicd
+maintainers:
+  - name: Sanjay Naidu

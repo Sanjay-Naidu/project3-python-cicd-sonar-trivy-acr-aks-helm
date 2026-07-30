@@ -1,0 +1,17 @@
+# =============================================================================
+# Project : Project 3 - Python App CI/CD on Azure AKS
+# Author  : Sanjay Naidu
+# File    : helm/python-app/templates/configmap.yaml
+# =============================================================================
+# Non-secret app configuration only. Anything sensitive belongs in a Secret
+# (or Azure Key Vault + CSI driver - see README roadmap), never here.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "python-app.fullname" . }}
+  labels:
+    {{- include "python-app.labels" . | nindent 4 }}
+data:
+  {{- range $key, $value := .Values.appConfig }}
+  {{ $key }}: {{ $value | quote }}
+  {{- end }}

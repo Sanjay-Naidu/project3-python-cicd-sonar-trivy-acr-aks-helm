@@ -1,0 +1,95 @@
+# =============================================================================
+# Project : Project 3 - Python App CI/CD on Azure AKS
+# Author  : Sanjay Naidu
+# File    : .github/workflows/terraform.yml - infrastructure pipeline
+# =============================================================================
+# Strategy:
+#   - PRs / pushes touching terraform/** : fmt check + validate + PLAN only
+#   - apply / destroy : manual workflow_dispatch, gated by the 'prod'
+#     environment (requires your approval) - infra never changes silently.
+# `destroy` is a first-class action here on purpose: tearing the whole stack
+# down when you are not demoing is the single biggest cost saver.
+
+name: Terraform Infra
+
+on:
+  pull_request:
+    branches: [main]
+    paths: ["terraform/**"]
+  push:
+    branches: [main]
+    paths: ["terraform/**"]
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Terraform action to run"
+        type: choice
+        required: true
+        default: plan
+        options: [plan, apply, destroy]
+
+concurrency:
+  group: terraform
+  cancel-in-progress: false
+
+permissions:
+  id-token: write # OIDC federation with Azure
+  contents: read
+
+# Terraform's azurerm provider AND backend read these ARM_* variables -
+# with ARM_USE_OIDC the runner exchanges its GitHub token for an Azure token.
+env:
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_USE_OIDC: "true"
+
+defaults:
+  run:
+    working-directory: terraform
+
+jobs:
+  plan:
+    name: Format, validate, plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.10.0"
+
+      - name: Terraform fmt check
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init
+        run: terraform init -backend-config=backend.hcl
+
+      - name: Terraform validate
+        run: terraform validate
+
+      - name: Terraform plan
+        run: terraform plan -input=false
+
+  apply:
+    name: Apply / Destroy (requires approval)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    needs: plan
+    if: github.event_name == 'workflow_dispatch' && contains(fromJSON('["apply","destroy"]'), inputs.action)
+    environment: prod # pauses for manual approval
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.10.0"
+
+      - name: Terraform init
+        run: terraform init -backend-config=backend.hcl
+
+      - name: Terraform ${{ inputs.action }}
+        run: terraform ${{ inputs.action }} -input=false -auto-approve

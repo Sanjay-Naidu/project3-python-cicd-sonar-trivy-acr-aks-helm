@@ -1,0 +1,110 @@
+# =============================================================================
+# Project : Project 3 - Python App CI/CD on Azure AKS
+# Author  : Sanjay Naidu
+# File    : helm/python-app/values.yaml - base (default) values
+# =============================================================================
+# Layering strategy: this file holds safe defaults; values-dev.yaml and
+# values-prod.yaml override ONLY what differs per environment. The CD pipeline
+# additionally injects image.repository and image.tag with --set, so the chart
+# itself never hardcodes a registry or build.
+
+replicaCount: 1
+
+image:
+  # Overridden by CD: --set image.repository=<acr>.azurecr.io/python-app
+  repository: CHANGE_ME.azurecr.io/python-app
+  # Overridden by CD with the immutable git-sha tag (never deploy :latest -
+  # you cannot tell what is running or roll back reliably).
+  tag: ""
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Dedicated ServiceAccount per app (never the namespace default) - least
+  # privilege, and ready for Azure Workload Identity annotations later.
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  # AKS managed nginx (app routing add-on) ingress class:
+  className: webapprouting.kubernetes.io
+  annotations: {}
+  # Empty host = match any host -> reachable directly via the ingress public IP
+  # (no domain purchase needed for a demo). Set a real host + tls for a domain.
+  host: ""
+  path: /
+  tls: []
+
+# Right-sized for Standard_B2s nodes. Requests are what the scheduler
+# reserves; limits cap runaway usage. Memory request == limit avoids
+# OOM-kill surprises from overcommit.
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+
+# PodDisruptionBudget - keeps at least N pods up during node drains/upgrades.
+pdb:
+  enabled: false
+  minAvailable: 1
+
+networkPolicy:
+  # Restricts inbound traffic to the ingress controller + same namespace.
+  # Off by default so first deployments are friction-free; enable as a
+  # hardening step (see README roadmap).
+  enabled: false
+
+# Rendered into a ConfigMap and injected via envFrom (12-factor config).
+appConfig:
+  ENVIRONMENT: "local"
+  LOG_LEVEL: "INFO"
+
+# Probe timings (paths are fixed by the app: /healthz liveness, /readyz readiness).
+probes:
+  liveness:
+    initialDelaySeconds: 5
+    periodSeconds: 15
+    timeoutSeconds: 3
+    failureThreshold: 3
+  readiness:
+    initialDelaySeconds: 3
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+# Pod-level security: non-root with a locked-down seccomp profile.
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  fsGroup: 10001
+  seccompProfile:
+    type: RuntimeDefault
+
+# Container-level security: immutable root fs, no privilege escalation,
+# all Linux capabilities dropped.
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL

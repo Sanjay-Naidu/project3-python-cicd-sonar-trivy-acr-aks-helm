@@ -1,0 +1,12 @@
+# =============================================================================
+# Project : Project 3 - Python App CI/CD on Azure AKS
+# Author  : Sanjay Naidu
+# File    : app/requirements-dev.txt - test/lint tooling (CI only, not shipped)
+# =============================================================================
+# Kept separate from requirements.txt so the Docker image never contains
+# test tooling (smaller image, cleaner vulnerability scans).
+
+pytest==8.3.4
+pytest-cov==6.0.0
+httpx==0.28.1
+ruff==0.9.6

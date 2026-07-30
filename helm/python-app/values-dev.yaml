@@ -1,0 +1,23 @@
+# =============================================================================
+# Project : Project 3 - Python App CI/CD on Azure AKS
+# Author  : Sanjay Naidu
+# File    : helm/python-app/values-dev.yaml - dev namespace overrides
+# =============================================================================
+# Dev priorities: cheap and fast feedback. Single replica, no HPA/PDB, no
+# ingress (access via `kubectl port-forward` - keeps the single public
+# endpoint reserved for prod and costs nothing).
+
+replicaCount: 1
+
+ingress:
+  enabled: false
+
+autoscaling:
+  enabled: false
+
+pdb:
+  enabled: false
+
+appConfig:
+  ENVIRONMENT: "dev"
+  LOG_LEVEL: "DEBUG"

@@ -1,0 +1,29 @@
+# =============================================================================
+# Project : Project 3 - Python App CI/CD on Azure AKS
+# Author  : Sanjay Naidu
+# File    : .dockerignore - keep the build context small and secret-free
+# =============================================================================
+# Everything not needed inside the image is excluded. A small context means
+# faster builds and no risk of leaking state files or CI config into layers.
+
+.git
+.github
+.gitignore
+.venv
+venv
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+.coverage
+coverage.xml
+tests/
+terraform/
+helm/
+docs/
+README.md
+LICENSE
+sonar-project.properties
+Dockerfile
+.dockerignore
+.env

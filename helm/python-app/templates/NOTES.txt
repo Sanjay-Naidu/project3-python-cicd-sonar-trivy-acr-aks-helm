@@ -1,0 +1,26 @@
+=============================================================================
+Project : Project 3 - Python App CI/CD on Azure AKS  (Author: Sanjay Naidu)
+Release : {{ .Release.Name }} deployed to namespace "{{ .Release.Namespace }}"
+Version : {{ .Values.image.tag | default .Chart.AppVersion }}
+=============================================================================
+
+1. Check the rollout:
+   kubectl -n {{ .Release.Namespace }} rollout status deploy/{{ include "python-app.fullname" . }}
+
+{{- if .Values.ingress.enabled }}
+
+2. Get the public IP of the managed nginx ingress:
+   kubectl -n app-routing-system get svc nginx -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+
+   Then open:  http://<PUBLIC-IP>/         (service info + version)
+               http://<PUBLIC-IP>/docs     (interactive API docs)
+{{- else }}
+
+2. This environment has no ingress (by design - dev is port-forward only):
+   kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "python-app.fullname" . }} 8080:{{ .Values.service.port }}
+
+   Then open:  http://localhost:8080/
+{{- end }}
+
+3. Run the built-in smoke test:
+   helm test {{ .Release.Name }} -n {{ .Release.Namespace }} --logs

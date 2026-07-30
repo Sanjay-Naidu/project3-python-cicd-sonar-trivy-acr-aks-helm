@@ -1,0 +1,12 @@
+# =============================================================================
+# Project : Project 3 - Python App CI/CD on Azure AKS
+# Author  : Sanjay Naidu
+# File    : app/requirements.txt - runtime dependencies (pinned)
+# =============================================================================
+# WHY pinned versions: reproducible builds - the image built in CI is identical
+# every time. Dependabot (.github/dependabot.yml) raises PRs to bump these,
+# and every bump goes through the full test + scan pipeline before merge.
+
+fastapi==0.115.8
+uvicorn[standard]==0.34.0
+prometheus-fastapi-instrumentator==7.0.0

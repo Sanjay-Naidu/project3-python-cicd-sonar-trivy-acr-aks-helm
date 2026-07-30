@@ -1,0 +1,59 @@
+# =============================================================================
+# Project : Project 3 - Python App CI/CD on Azure AKS
+# Author  : Sanjay Naidu
+# File    : .github/workflows/reusable-quality.yml
+# =============================================================================
+# WHY a reusable workflow: PR validation AND the main deploy pipeline both
+# need identical lint/test/scan steps. Defining them once (DRY) means the
+# checks can never drift apart between the two pipelines.
+
+name: Reusable - Code Quality
+
+on:
+  workflow_call:
+    secrets:
+      SONAR_TOKEN:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Lint, Test, SonarCloud
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          # Sonar needs full history to attribute code age / new-code period.
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            app/requirements.txt
+            app/requirements-dev.txt
+
+      - name: Install dependencies
+        run: pip install -r app/requirements.txt -r app/requirements-dev.txt
+
+      - name: Lint (ruff)
+        run: ruff check app tests
+
+      - name: Run tests with coverage
+        run: pytest --cov --cov-report=xml --cov-report=term
+
+      - name: SonarCloud analysis
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+        # To make the pipeline FAIL when the Sonar quality gate fails,
+        # uncomment below once your first few analyses are green:
+        # with:
+        #   args: -Dsonar.qualitygate.wait=true

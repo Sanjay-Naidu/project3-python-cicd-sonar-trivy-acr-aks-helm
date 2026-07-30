@@ -1,0 +1,80 @@
+# =============================================================================
+# Project : Project 3 - Python App CI/CD on Azure AKS
+# Author  : Sanjay Naidu
+# File    : .github/workflows/pr-validation.yml - CI gate for pull requests
+# =============================================================================
+# Runs on every PR to main. Nothing is pushed or deployed from here - the
+# goal is fast, safe feedback: lint + tests + Sonar, Trivy IaC config scan,
+# and a full image build with a BLOCKING vulnerability scan.
+
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [main]
+
+# New push to the same PR cancels the previous (still-running) validation.
+concurrency:
+  group: pr-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  security-events: write # for SARIF upload to the GitHub Security tab
+
+jobs:
+  quality:
+    name: Code quality
+    uses: ./.github/workflows/reusable-quality.yml
+    secrets: inherit
+
+  trivy-iac:
+    name: Trivy - IaC misconfiguration scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      # Scans Terraform, Dockerfile and Helm for misconfigurations.
+      # exit-code 0 = report-only: findings land in the Security tab for
+      # triage instead of blocking (some findings are deliberate cost
+      # trade-offs, e.g. no Log Analytics on AKS). The IMAGE scan below
+      # IS blocking - runtime vulnerabilities are non-negotiable.
+      - name: Trivy config scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: CRITICAL,HIGH
+          format: sarif
+          output: trivy-iac.sarif
+          exit-code: "0"
+
+      - name: Upload IaC findings to Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-iac.sarif
+          category: trivy-iac
+
+  image-build-scan:
+    name: Docker build + Trivy image scan (blocking)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t python-app:pr-${{ github.event.pull_request.number }} .
+
+      # BLOCKING: a HIGH/CRITICAL vulnerability with an available fix fails
+      # the PR. ignore-unfixed skips vulns with no patched version yet -
+      # failing on those would only block merges with no action available.
+      - name: Trivy image scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: image
+          image-ref: python-app:pr-${{ github.event.pull_request.number }}
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
