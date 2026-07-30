@@ -41,7 +41,7 @@ jobs:
       # trade-offs, e.g. no Log Analytics on AKS). The IMAGE scan below
       # IS blocking - runtime vulnerabilities are non-negotiable.
       - name: Trivy config scan
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: config
           scan-ref: .
@@ -71,7 +71,7 @@ jobs:
       # the PR. ignore-unfixed skips vulns with no patched version yet -
       # failing on those would only block merges with no action available.
       - name: Trivy image scan
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: image
           image-ref: python-app:pr-${{ github.event.pull_request.number }}
