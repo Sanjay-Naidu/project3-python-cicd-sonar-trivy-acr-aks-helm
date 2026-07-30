@@ -13,7 +13,12 @@ metadata:
     {{- include "python-app.labels" . | nindent 4 }}
   annotations:
     "helm.sh/hook": test
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    # NOT hook-succeeded: deleting the pod immediately on success races
+    # `helm test --logs`, which reads the pod's log AFTER it completes -
+    # hit this exact race in CI ("pods ... not found"). Leaving the pod
+    # until the next test run (before-hook-creation) makes both the CLI
+    # log read and `kubectl logs` after the fact reliable.
+    "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   restartPolicy: Never
   securityContext:
