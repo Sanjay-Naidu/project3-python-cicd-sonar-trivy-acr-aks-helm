@@ -7,6 +7,6 @@
 # every time. Dependabot (.github/dependabot.yml) raises PRs to bump these,
 # and every bump goes through the full test + scan pipeline before merge.
 
-fastapi==0.115.8
+fastapi==0.141.1
 uvicorn[standard]==0.34.0
 prometheus-fastapi-instrumentator==7.0.0
