@@ -6,7 +6,10 @@
 # Only two values REQUIRE editing before first apply: acr_name (globally
 # unique) and budget_alert_email. Everything else has sensible cheap defaults.
 
-location            = "eastus"
+# eastus rejected AKS cluster creation with "AKSCapacityHeavyUsage" (a
+# transient regional capacity throttle, not a quota problem) - switched to
+# westus2, a large/well-provisioned region less prone to this.
+location            = "westus2"
 resource_group_name = "rg-project3-aks"
 
 acr_name         = "acrproject3sanjay01"
