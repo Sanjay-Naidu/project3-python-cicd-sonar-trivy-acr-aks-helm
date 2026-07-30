@@ -20,4 +20,16 @@ resource "azurerm_subnet" "aks" {
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.this.name
   address_prefixes     = [var.aks_subnet_cidr]
+
+  # virtual_network_name is a plain string (this provider version has no
+  # virtual_network_id argument), so its VALUE never changes even when the
+  # VNet is destroyed and recreated with the same name (e.g. a region move
+  # forces RG/VNet replacement, but "vnet-project3" is still "vnet-project3").
+  # Terraform then sees no attribute diff and leaves the subnet alone, even
+  # though the real VNet underneath it is gone - hit exactly this once.
+  # replace_triggered_by keys off the VNet's *id* instead of its name, so a
+  # region move correctly forces the subnet to be replaced too.
+  lifecycle {
+    replace_triggered_by = [azurerm_virtual_network.this.id]
+  }
 }
