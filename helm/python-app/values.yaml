@@ -36,8 +36,13 @@ service:
 
 ingress:
   enabled: false
-  # AKS managed nginx (app routing add-on) ingress class:
-  className: webapprouting.kubernetes.io
+  # AKS managed nginx (app routing add-on) ingress class. NOT the generic
+  # "webapprouting.kubernetes.io" - the add-on registers an Azure-qualified
+  # IngressClass. Using the wrong name doesn't error at apply time; the
+  # controller silently ignores the Ingress ("no object matching key ...
+  # in local store" in its logs) and every path 404s except by coincidence.
+  # Confirmed via `kubectl get ingressclass -A`.
+  className: webapprouting.kubernetes.azure.com
   annotations: {}
   # Empty host = match any host -> reachable directly via the ingress public IP
   # (no domain purchase needed for a demo). Set a real host + tls for a domain.
