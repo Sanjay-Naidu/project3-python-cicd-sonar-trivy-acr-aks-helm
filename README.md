@@ -101,7 +101,7 @@ flowchart LR
 | **Remote state in Azure Storage** | Local state gets lost and leaks secrets; remote state has locking and is CI-accessible. Bootstrap storage created via CLI (Terraform can't store state in an account it hasn't created yet). |
 | **Modules (network / acr / aks)** | Isolation of concerns; the same modules scale to real multi-env estates by changing inputs. |
 | **AKS Free tier control plane** | $0 vs $73/month for Standard — Standard only adds an uptime SLA a demo doesn't need. |
-| **`Standard_B2s` nodes, autoscaler 1→2** | Cheapest viable size (~$30/mo/node); 2×B2s exactly fits the free-trial 4 vCPU quota. |
+| **`Standard_D2as_v7` nodes, autoscaler 1→2** | Burstable B-series (would've been ~$30/mo/node) isn't in this subscription's SKU quota at all - Azure rejected it outright. D2as_v7 is the cheapest of the D/E/F-v7 families this quota *does* allow (~$66/mo/node, verified via the Azure Retail Prices API). |
 | **One cluster, `dev` + `prod` namespaces** | Two clusters would double cost. Namespace isolation still demonstrates real multi-env promotion. (In an enterprise: separate clusters/subscriptions — I can explain the trade-off.) |
 | **Azure CNI Overlay** | Modern AKS default; pods draw from an overlay CIDR so the subnet never exhausts. |
 | **Managed nginx (app routing add-on)** | Azure operates the ingress controller — no manual ingress-nginx install to patch and maintain. |
@@ -141,13 +141,15 @@ flowchart LR
 | Resource | Config | ~Cost/month |
 |---|---|---|
 | AKS control plane | Free tier | $0 |
-| Node pool | 1× Standard_B2s (scales to 2) | ~$30 |
+| Node pool | 1× Standard_D2as_v7 (scales to 2) | ~$66 |
 | OS disk | 32 GiB (right-sized from 128) | ~$2 |
 | ACR | Basic | ~$5 |
 | Load balancer + public IP | Standard (ingress) | ~$8 |
 | State storage | LRS, a few KB | <$1 |
 | SonarCloud / GitHub Actions / Trivy | public repo | $0 |
-| **Total (running 24×7)** | | **~$45** |
+| **Total (running 24×7, 1 node)** | | **~$81** |
+
+⚠️ **Cost note:** the original plan assumed `Standard_B2s` (~$30/mo/node), but this subscription's quota doesn't allow the B-series at all in `eastus` - Azure only permits modern D/E/F-v7 families here, and `D2as_v7` (~$66/mo/node) is the cheapest of those. At $81/mo running continuously, the $100 free-trial credit lasts a bit over a month - **the stop/destroy levers below are not optional here, they're what makes this project fit the budget.**
 
 Cost levers built in:
 

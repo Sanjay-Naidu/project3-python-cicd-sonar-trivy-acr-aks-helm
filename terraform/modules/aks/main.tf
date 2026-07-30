@@ -6,9 +6,10 @@
 # Key decisions (each one is an interview talking point):
 #   sku_tier Free        : $0 control plane; Standard ($73/mo) only adds the
 #                          uptime SLA - unnecessary for a demo.
-#   B2s + autoscaler 1-2 : cheapest viable nodes; scales to 2 under load and
-#                          back to 1 when idle. 2 x B2s fits the free-trial
-#                          4 vCPU quota exactly.
+#   D2as_v7 + autoscaler 1-2 : cheapest SKU this subscription's quota
+#                          allows (burstable B-series was rejected outright -
+#                          see variables.tf node_vm_size for the full story);
+#                          scales to 2 under load, back to 1 when idle.
 #   CNI Overlay          : pods get IPs from an overlay CIDR, not the subnet -
 #                          modern AKS default, no subnet IP exhaustion.
 #   OIDC + workload identity : enabled (free) so pods can later authenticate

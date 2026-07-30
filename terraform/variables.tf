@@ -34,9 +34,22 @@ variable "kubernetes_version" {
 }
 
 variable "node_vm_size" {
-  description = "Node VM size. Standard_B2s (2 vCPU / 4 GiB) is the cheapest size that runs AKS system pods + this app comfortably (~USD 30/month)."
+  description = <<-EOT
+    Node VM size. Standard_D2as_v7 (2 vCPU / 8 GiB, AMD) - the cheapest SKU
+    available on this subscription's quota (~USD 66/month per node at the
+    time this was checked via the Azure Retail Prices API). Burstable
+    B-series (e.g. Standard_B2s, ~USD 30/month) is the usual go-to for a
+    cost-optimised demo but is NOT allowed on every subscription/region
+    combination - some free-trial subscriptions only have quota for modern
+    D/E/F-v7 families. If you hit "VM size ... is not allowed in your
+    subscription", the CreateOrUpdate error lists every SKU your
+    subscription CAN use in that region - re-check the Azure Retail Prices
+    API (https://prices.azure.com/api/retail/prices) for each candidate
+    before picking one, since price does not correlate with SKU family the
+    way you'd expect (D-series outpriced F-series here).
+  EOT
   type        = string
-  default     = "Standard_B2s"
+  default     = "Standard_D2as_v7"
 }
 
 variable "min_node_count" {

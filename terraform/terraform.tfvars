@@ -12,7 +12,11 @@ resource_group_name = "rg-project3-aks"
 acr_name         = "acrproject3sanjay01"
 aks_cluster_name = "aks-project3"
 
-node_vm_size   = "Standard_B2s"
+# Standard_B2s (burstable) is NOT allowed on this subscription's quota in
+# eastus - Azure rejected it with a 400 listing only D/E/F-v7 families as
+# available. Standard_D2as_v7 is the cheapest of those (~$66/mo/node vs the
+# ~$30/mo B2s would have cost) - verified via the Azure Retail Prices API.
+node_vm_size   = "Standard_D2as_v7"
 min_node_count = 1
 max_node_count = 2
 
