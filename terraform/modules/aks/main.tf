@@ -3,7 +3,7 @@
 # Author  : Sanjay Naidu
 # File    : terraform/modules/aks/main.tf - AKS cluster (cost-optimised, prod-shaped)
 # =============================================================================
-# Key decisions (each one is an interview talking point):
+# Key decisions:
 #   sku_tier Free        : $0 control plane; Standard ($73/mo) only adds the
 #                          uptime SLA - unnecessary for a demo.
 #   D2as_v7 + autoscaler 1-2 : cheapest SKU this subscription's quota

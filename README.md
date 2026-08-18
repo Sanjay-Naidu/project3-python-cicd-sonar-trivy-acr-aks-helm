@@ -73,7 +73,7 @@ flowchart LR
 
 ---
 
-## Why each decision (the part interviewers ask about)
+## Why each decision
 
 ### Application
 
@@ -154,7 +154,7 @@ flowchart LR
 Cost levers built in:
 
 - `az aks stop --name aks-project3 --resource-group rg-project3-aks` — pause the cluster when not demoing (compute drops to ~$0; start takes ~3 min).
-- Terraform workflow has a gated **destroy** action — tear everything down between interview cycles, re-create in ~10 minutes.
+- Terraform workflow has a gated **destroy** action — tear everything down when you are not using it, re-create in ~10 minutes.
 - Budget alerts email at 50/80/100% of $80.
 
 ---

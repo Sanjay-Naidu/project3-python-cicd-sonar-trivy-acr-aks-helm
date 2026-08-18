@@ -259,7 +259,7 @@ Demo-worthy check: the `version` field on `/` equals the image tag `sha-<commit>
 az aks stop --name aks-project3 --resource-group rg-project3-aks
 az aks start --name aks-project3 --resource-group rg-project3-aks   # ~3 min
 
-# Nuke everything between interview cycles (state survives in rg-project3-tfstate):
+# Nuke everything when you are done (state survives in rg-project3-tfstate):
 # GitHub -> Actions -> "Terraform Infra" -> Run workflow -> action: destroy -> approve
 # (or locally: terraform destroy)
 ```
