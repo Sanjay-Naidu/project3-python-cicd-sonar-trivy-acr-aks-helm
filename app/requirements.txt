@@ -8,7 +8,7 @@
 # and every bump goes through the full test + scan pipeline before merge.
 
 fastapi==0.141.1
-uvicorn[standard]==0.34.0
+uvicorn[standard]==0.52.1
 prometheus-fastapi-instrumentator==8.1.0
 # Trivy flagged 3 HIGH CVEs (CVE-2025-62727, CVE-2026-48818, CVE-2026-54283)
 # in starlette 0.45.3 (a transitive dep) during the first image scan -
