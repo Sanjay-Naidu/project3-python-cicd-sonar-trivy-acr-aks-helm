@@ -51,7 +51,7 @@ jobs:
     outputs:
       image_tag: ${{ steps.meta.outputs.tag }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Immutable tag from the commit SHA: every image maps 1:1 to a commit,
       # which makes "what is running in prod?" answerable and rollbacks exact.
@@ -93,7 +93,7 @@ jobs:
     needs: build-and-push
     environment: dev
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Azure login (OIDC)
         uses: azure/login@v2
@@ -134,7 +134,7 @@ jobs:
     # promotion gate: the EXACT image verified in dev goes to prod.
     environment: prod
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Azure login (OIDC)
         uses: azure/login@v2
